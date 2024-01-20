@@ -61,24 +61,28 @@ const Chat = () => {
   //     text: "Hi, Suchona baby",
   //   });
   // };
-  if (!DBuser || !chats) return <p className="text-center">Loading......</p>;
+  if (!chats || !DBuser) return <p className="text-center">Loading...00...</p>;
   return (
-    <div className="flex">
+    <div className="flex bg-[#333]">
       {/* Left  */}
-      <div className="w-[20%] flex flex-col gap-4 bg-[#333] border-t p-4">
-        <p className="text-2xl font-semibold text-white">Chats</p>
-        <div className="flex flex-col gap-4">
+      <div className="w-[20%] flex flex-col">
+        <p className="text-xl font-semibold text-white text-center border w-max mx-auto my-3 py-2 px-10 rounded-full border-primary">
+          CHATS
+        </p>
+        <div className="flex flex-col">
           {chats.map((chat) => (
             <div
               className={`${chat?._id == currentChat?._id ? "bg-primary" : ""}`}
               onClick={() => setCurrentChat(chat)}
               key={chat._id}
             >
-              <Conversation
-                online={checkOnlineStatus(chat)}
-                data={chat}
-                currentUserId={DBuser._id}
-              />
+              {chat && (
+                <Conversation
+                  online={checkOnlineStatus(chat)}
+                  data={chat}
+                  currentUserId={DBuser._id}
+                />
+              )}
             </div>
           ))}
         </div>
@@ -86,13 +90,15 @@ const Chat = () => {
       {/* Right  */}
       <div className="w-[80%] flex flex-col gap-4">
         <div className="">
-          <ChatBox
-            setSendMessage={setSendMessage}
-            receiveMessage={receiveMessage}
-            setReceiveMessage={setReceiveMessage}
-            chat={currentChat}
-            currentUserId={DBuser._id}
-          />
+          {currentChat && (
+            <ChatBox
+              setSendMessage={setSendMessage}
+              receiveMessage={receiveMessage}
+              setReceiveMessage={setReceiveMessage}
+              chat={currentChat}
+              currentUserId={DBuser._id}
+            />
+          )}
         </div>
       </div>
     </div>

@@ -21,7 +21,13 @@ export const NavBar = () => {
     console.log(res);
   };
   return (
-    <Box sx={{ flexGrow: 1, backgroundColor: "#333333" }}>
+    <Box
+      sx={{
+        flexGrow: 1,
+        backgroundColor: "#333333",
+        borderBottom: "1px solid #fff",
+      }}
+    >
       <AppBar position="static" sx={{ backgroundColor: "#333333" }}>
         <Toolbar>
           <IconButton

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
 // import "../CSS/Chat.css";
+import { useQuery } from "@tanstack/react-query";
 import useAxios from "../Hooks/useAxios";
 import useUser from "../Hooks/useUser";
 import ChatBox from "./ChatBox";
@@ -9,7 +10,7 @@ import Conversation from "./Conversation";
 const Chat = () => {
   const { user: DBuser } = useUser();
   const axiosInstance = useAxios();
-  const [chats, setChats] = useState([]);
+  // const [chats, setChats] = useState([]);
   const [currentChat, setCurrentChat] = useState(null);
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [sendMessage, setSendMessage] = useState(null);
@@ -35,23 +36,17 @@ const Chat = () => {
   useEffect(() => {
     socket.current.on("receive-message", (data) => {
       setReceiveMessage(data);
-      console.log(data);
     });
   });
 
   //! Get Sidebar Chats
-  useEffect(() => {
-    const getChats = async () => {
-      try {
-        const data = await axiosInstance.get(`/chat/${DBuser._id}`);
-        setChats(data.data);
-        console.log(data.data);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    getChats();
-  }, [axiosInstance, DBuser, DBuser?._id]);
+  const { data: chats } = useQuery({
+    queryKey: ["conversations", DBuser?._id],
+    queryFn: async ({ queryKey }) => {
+      const data = await axiosInstance.get(`/chat/${queryKey[1]}`);
+      return data.data;
+    },
+  });
 
   //! Find who are Online
   const checkOnlineStatus = (chat) => {
@@ -66,7 +61,7 @@ const Chat = () => {
   //     text: "Hi, Suchona baby",
   //   });
   // };
-  if (!DBuser) return <p>Loading......</p>;
+  if (!DBuser || !chats) return <p className="text-center">Loading......</p>;
   return (
     <div className="flex">
       {/* Left  */}
@@ -74,7 +69,11 @@ const Chat = () => {
         <p className="text-2xl font-semibold text-white">Chats</p>
         <div className="flex flex-col gap-4">
           {chats.map((chat) => (
-            <div onClick={() => setCurrentChat(chat)} key={chat._id}>
+            <div
+              className={`${chat?._id == currentChat?._id ? "bg-primary" : ""}`}
+              onClick={() => setCurrentChat(chat)}
+              key={chat._id}
+            >
               <Conversation
                 online={checkOnlineStatus(chat)}
                 data={chat}

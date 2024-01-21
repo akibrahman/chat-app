@@ -28,11 +28,12 @@ const ChatBox = ({
   });
 
   //! Find Messages
-  useQuery({
+  const { data: ss } = useQuery({
     queryKey: ["messages", chat?._id],
     queryFn: async ({ queryKey }) => {
       const messages = await axiosInstance.get(`/message/${queryKey[1]}`);
-      setMessages(messages.data);
+      return messages.data;
+      // setMessages(messages.data);
     },
   });
 
@@ -40,9 +41,10 @@ const ChatBox = ({
   useEffect(() => {
     if (receiveMessage && receiveMessage?.chatId == chat?._id) {
       setMessages([...messages, receiveMessage]);
+      ss.push(receiveMessage);
       setReceiveMessage("");
     }
-  }, [receiveMessage, chat?._id, messages, setReceiveMessage]);
+  }, [receiveMessage, chat?._id, messages, setReceiveMessage, ss]);
 
   //! Always Scroll Down
   useEffect(() => {
@@ -65,6 +67,7 @@ const ChatBox = ({
     try {
       const { data } = await axiosInstance.post("/message", message);
       setMessages([...messages, data]);
+      ss.push(data);
       setNewMessage("");
     } catch (error) {
       console.log(error);
@@ -90,7 +93,7 @@ const ChatBox = ({
       </div>
       {/* Messaging Part  */}
       <div className="scrollbar flex flex-col gap-2 p-6 overflow-y-scroll bg-[#333]">
-        {messages.map((msg) => (
+        {ss?.map((msg) => (
           <div
             ref={scroll}
             key={msg._id}

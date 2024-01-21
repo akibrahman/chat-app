@@ -3,7 +3,7 @@ import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import axios from "axios";
 import { useContext, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "./AuthProvider";
 
 const RegistrationForm = () => {
@@ -52,6 +52,12 @@ const RegistrationForm = () => {
             label="Name"
             variant="outlined"
             fullWidth
+            InputProps={{
+              style: { color: "white" },
+            }}
+            InputLabelProps={{
+              style: { color: "white" },
+            }}
             margin="normal"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
@@ -60,6 +66,12 @@ const RegistrationForm = () => {
             label="E-mail"
             variant="outlined"
             fullWidth
+            InputProps={{
+              style: { color: "white" },
+            }}
+            InputLabelProps={{
+              style: { color: "white" },
+            }}
             margin="normal"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -70,14 +82,15 @@ const RegistrationForm = () => {
               accept="image/*" // Set the accepted file types (optional)
               id="file-input"
               type="file"
-              className={""}
+              style={{ display: "none" }}
               onChange={handleFileChange}
               inputProps={{ "aria-label": "upload file" }}
             />
-            <label htmlFor="file-input">
+            <label htmlFor="file-input" className="flex items-center gap-4">
               <Button variant="contained" component="span" className={""}>
                 Choose File
               </Button>
+              <p>Profile Picture</p>
             </label>
             {selectedFile && (
               <div>
@@ -91,17 +104,28 @@ const RegistrationForm = () => {
             type="password"
             variant="outlined"
             fullWidth
+            InputProps={{
+              style: { color: "white" },
+            }}
+            InputLabelProps={{
+              style: { color: "white" },
+            }}
             margin="normal"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleRegistration}
-          >
-            Login
-          </Button>
+          <div className="flex items-center justify-between">
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleRegistration}
+            >
+              Register
+            </Button>
+            <Link to="/login">
+              <p className="font-semibold">Or, Login</p>
+            </Link>
+          </div>
         </form>
       </Container>
     </div>

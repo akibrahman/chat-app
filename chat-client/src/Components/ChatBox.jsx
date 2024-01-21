@@ -3,10 +3,12 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { FaPlus } from "react-icons/fa";
 import { ImSpinner8 } from "react-icons/im";
+import { MdDownload } from "react-icons/md";
 import { TbSend } from "react-icons/tb";
 import InputEmoji from "react-input-emoji";
 import { format } from "timeago.js";
 import useAxios from "../Hooks/useAxios";
+import useUser from "../Hooks/useUser";
 import { base64 } from "../utils/base64";
 import { imageHeightWidth } from "../utils/imageHeightWidth";
 import { imgbbUploader } from "../utils/imgbbUploader";
@@ -20,8 +22,11 @@ const ChatBox = ({
   setReceiveMessage,
 }) => {
   const axiosInstance = useAxios();
+  const { user } = useUser();
   const [newMessage, setNewMessage] = useState("");
   const [previewImage, setPreviewImage] = useState(null);
+  const [imageSending, setImageSending] = useState(false);
+  const [messageSending, setMessageSending] = useState(false);
   const scroll = useRef();
 
   //! Find whome to chat
@@ -60,9 +65,9 @@ const ChatBox = ({
   //! Send Message
   const handleSend = async (event) => {
     if (!newMessage) {
-      alert();
       return;
     }
+    setMessageSending(true);
     event.preventDefault();
     const message = {
       senderId: currentUserId,
@@ -79,6 +84,7 @@ const ChatBox = ({
     //Active Socket
     const receiverId = chat.members.find((id) => id != currentUserId);
     setSendMessage({ ...message, receiverId });
+    setMessageSending(false);
   };
 
   //! Image Change which one to send
@@ -90,6 +96,7 @@ const ChatBox = ({
 
   //! Send Image
   const sendImage = async () => {
+    setImageSending(true);
     const url = await imgbbUploader(previewImage.image);
     const message = {
       senderId: currentUserId,
@@ -106,12 +113,13 @@ const ChatBox = ({
     const receiverId = chat.members.find((id) => id != currentUserId);
     setSendMessage({ ...message, receiverId });
     setPreviewImage(null);
+    setImageSending(false);
   };
 
   return (
     chat &&
     userData && (
-      <div className="bg-[#333] grid grid-rows-[12vh,67vh,10vh] border-l">
+      <div className="bg-[#333] grid grid-rows-[8vh,75vh,10vh] md:grid-rows-[12vh,67vh,10vh] border-l">
         {/* Receiver Part  */}
         <div className="bg-primary rounded-full text-white flex items-center gap-2 pl-5 mt-2 mx-2">
           <img
@@ -131,16 +139,33 @@ const ChatBox = ({
                 <div
                   ref={scroll}
                   key={msg._id}
-                  className={
-                    msg.senderId == currentUserId
-                      ? "border border-[#1976D2] text-white p-4 rounded-tl-3xl rounded-tr-3xl rounded-bl-3xl rounded-br-none max-w-md w-fit flex flex-col gap-2 self-end "
-                      : "border text-white p-4 rounded-tl-3xl rounded-tr-3xl rounded-br-3xl rounded-bl-0 max-w-md w-fit flex flex-col gap-2"
-                  }
+                  className={`${
+                    msg.senderId == currentUserId ? "chat-end" : "chat-start"
+                  } chat`}
                 >
-                  <span className="">{msg.text}</span>
-                  <span className="text-xs bg-white text-[#333] rounded-full px-2 py-[2px] w-max">
+                  <div className="chat-image avatar">
+                    <div className="w-10 rounded-full">
+                      <img
+                        alt="Tailwind CSS chat bubble component"
+                        src={`${
+                          msg.senderId == currentUserId
+                            ? user.profilePicture
+                            : userData.profilePicture
+                        } `}
+                      />
+                    </div>
+                  </div>
+                  <div className="chat-header">
+                    <time className="text-xs opacity-50">
+                      {new Date(msg.createdAt).toLocaleTimeString()}
+                    </time>
+                  </div>
+                  <div className="chat-bubble bg-primary text-white">
+                    {msg.text}
+                  </div>
+                  <div className="chat-footer opacity-50">
                     {format(msg.createdAt)}
-                  </span>
+                  </div>
                 </div>
               ) : (
                 <div
@@ -156,6 +181,20 @@ const ChatBox = ({
                     src={msg.text}
                     className={`aspect-video w-56 rounded-md`}
                     alt="selected Image"
+                  />
+                  <MdDownload
+                    onClick={async () => {
+                      const response = await fetch(msg.text);
+                      const blob = await response.blob();
+                      const downloadButton = document.createElement("a");
+                      const blobUrl = window.URL.createObjectURL(blob);
+                      downloadButton.href = blobUrl;
+                      downloadButton.download = "downloaded_image.jpg";
+                      document.body.appendChild(downloadButton);
+                      downloadButton.click();
+                      document.body.removeChild(downloadButton);
+                    }}
+                    className="absolute bottom-2 left-2 bg-primary text-white p-1 text-3xl bg-opacity-70 rounded-md cursor-pointer duration-300 active:scale-75 select-none"
                   />
                   <span
                     className={`text-xs bg-white text-[#333] rounded-full px-2 py-[2px] w-max absolute ${
@@ -189,10 +228,14 @@ const ChatBox = ({
                 } w-56 rounded-md`}
                 alt="selected Image"
               />
-              <TbSend
-                onClick={sendImage}
-                className="text-6xl bg-white text-primary rounded-full p-2 duration-300 select-none active:scale-90 cursor-pointer"
-              />
+              {imageSending ? (
+                <ImSpinner8 className="text-6xl bg-white text-primary rounded-full p-2 animate-spin" />
+              ) : (
+                <TbSend
+                  onClick={sendImage}
+                  className="text-6xl bg-white text-primary rounded-full p-2 duration-300 select-none active:scale-90 cursor-pointer"
+                />
+              )}
             </div>
           )}
           <label
@@ -209,7 +252,11 @@ const ChatBox = ({
             id="imgSender"
           />
           <InputEmoji value={newMessage} onChange={(e) => setNewMessage(e)} />
-          <Button onClick={handleSend} variant="contained">
+          <Button
+            onClick={handleSend}
+            disabled={messageSending}
+            variant="contained"
+          >
             Send
           </Button>
         </div>

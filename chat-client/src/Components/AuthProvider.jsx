@@ -18,7 +18,7 @@ const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [authReloader, setAuthReloader] = useState(true);
   const [privateRouteLoader, setPrivateRouteLoader] = useState(true);
-  const [conversationOpen, setConversationOpen] = useState(false);
+  const [conversationOpen, setConversationOpen] = useState(true);
   //   const googleProvider = new GoogleAuthProvider();
   //! Getting Auth
   const auth = getAuth(app);
@@ -64,7 +64,7 @@ const AuthProvider = ({ children }) => {
         };
         console.log(userData);
         await axios.put(
-          `http://localhost:5000/all-users?email=${currentUser.email}`,
+          `${import.meta.env.VITE_SERVER}/all-users?email=${currentUser.email}`,
           userData
         );
         setPrivateRouteLoader(false);

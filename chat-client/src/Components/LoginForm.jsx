@@ -3,6 +3,7 @@ import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import { useContext, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import { AuthContext } from "./AuthProvider";
 
 const LoginForm = () => {
@@ -12,10 +13,18 @@ const LoginForm = () => {
   const [password, setPassword] = useState("");
 
   const handleLogin = async () => {
-    console.log("Logging in with:", username, password);
-    const res = await login(username, password);
-    navigate("/");
-    console.log(res);
+    try {
+      await login(username, password);
+      navigate("/");
+      toast.success("Login Successfull");
+    } catch (error) {
+      console.log(error);
+      if (error.code == "auth/invalid-credential") {
+        toast.error("Wrong Username or Password");
+      } else {
+        toast.error("Invalid Input");
+      }
+    }
   };
 
   return (
@@ -29,6 +38,12 @@ const LoginForm = () => {
             fullWidth
             margin="normal"
             value={username}
+            InputProps={{
+              style: { color: "white" },
+            }}
+            InputLabelProps={{
+              style: { color: "white" },
+            }}
             onChange={(e) => setUsername(e.target.value)}
           />
           <TextField
@@ -36,6 +51,12 @@ const LoginForm = () => {
             type="password"
             variant="outlined"
             fullWidth
+            InputProps={{
+              style: { color: "white" },
+            }}
+            InputLabelProps={{
+              style: { color: "white" },
+            }}
             margin="normal"
             value={password}
             onChange={(e) => setPassword(e.target.value)}

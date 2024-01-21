@@ -1,17 +1,18 @@
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
 // import "../CSS/Chat.css";
 import { useQuery } from "@tanstack/react-query";
 import { ImSpinner8 } from "react-icons/im";
 import useAxios from "../Hooks/useAxios";
 import useUser from "../Hooks/useUser";
+import { AuthContext } from "./AuthProvider";
 import ChatBox from "./ChatBox";
 import Conversation from "./Conversation";
 
 const Chat = () => {
   const { user: DBuser } = useUser();
   const axiosInstance = useAxios();
-  // const [chats, setChats] = useState([]);
+  const { conversationOpen, setConversationOpen } = useContext(AuthContext);
   const [currentChat, setCurrentChat] = useState(null);
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [sendMessage, setSendMessage] = useState(null);
@@ -32,7 +33,23 @@ const Chat = () => {
     socket.current.on("get-users", (users) => {
       setOnlineUsers(users);
     });
-  }, [DBuser]);
+    const intervalId = setInterval(() => {
+      socket.current = io(import.meta.env.VITE_SOCKET);
+      socket.current.emit("new-user-add", DBuser?._id);
+      socket.current.on("get-users", (users) => {
+        setOnlineUsers(users);
+      });
+    }, 5000);
+    return () => clearInterval(intervalId);
+  }, [DBuser?._id]);
+
+  // useEffect(() => {
+  //   socket.current = io(import.meta.env.VITE_SOCKET);
+  //   socket.current.emit("new-user-add", DBuser?._id);
+  //   socket.current.on("get-users", (users) => {
+  //     setOnlineUsers(users);
+  //   });
+  // }, [DBuser]);
   //! Receive from Socket
   useEffect(() => {
     socket.current.on("receive-message", (data) => {
@@ -69,9 +86,13 @@ const Chat = () => {
       </p>
     );
   return (
-    <div className="flex bg-[#333]">
+    <div className="flex bg-[#333] relative">
       {/* Left  */}
-      <div className="w-[20%] flex flex-col">
+      <div
+        className={`w-[200px] fixed ${
+          conversationOpen ? "left-0 md:left-0" : "left-full md:left-0"
+        } md:relative h-screen md:h-full bg-[#333] z-10 md:w-[20%] flex flex-col`}
+      >
         <p className="text-xl font-semibold text-white text-center border w-max mx-auto my-3 py-2 px-10 rounded-full border-primary">
           CHATS
         </p>
@@ -79,7 +100,10 @@ const Chat = () => {
           {chats.map((chat) => (
             <div
               className={`${chat?._id == currentChat?._id ? "bg-primary" : ""}`}
-              onClick={() => setCurrentChat(chat)}
+              onClick={() => {
+                setCurrentChat(chat);
+                setConversationOpen(false);
+              }}
               key={chat._id}
             >
               {chat && (
@@ -94,7 +118,7 @@ const Chat = () => {
         </div>
       </div>
       {/* Right  */}
-      <div className="w-[80%] flex flex-col gap-4">
+      <div className="w-full md:w-[80%] flex flex-col gap-4">
         <div className="">
           {currentChat ? (
             <ChatBox
@@ -105,7 +129,7 @@ const Chat = () => {
               currentUserId={DBuser._id}
             />
           ) : (
-            <div className="bg-[#333] w-full h-[89vh] border-l flex items-center justify-center">
+            <div className="bg-[#222] w-full h-[93vh] md:h-[89vh] border-l flex items-center justify-center">
               <span className="flex self-center justify-center text-xl text-white">
                 Tap on a Chat to Start Conversation...
               </span>

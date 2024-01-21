@@ -56,9 +56,6 @@ export const NavBar = () => {
           >
             {DBuser?.name}
           </Typography>
-          <Link to="/chat">
-            <Button color="inherit">Chat</Button>
-          </Link>
           {user ? (
             <Button onClick={logoutUser} color="inherit">
               Logout

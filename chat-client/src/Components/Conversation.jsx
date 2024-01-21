@@ -21,7 +21,7 @@ const Conversation = ({ data, currentUserId, online }) => {
   return (
     <>
       <div className="relative flex justify-between items-center p-4 hover:bg-[#80808038] cursor-pointer text-white">
-        <div className="relative flex flex-col items-center gap-1 md:flex-row md:gap-4">
+        <div className="relative flex items-center gap-4">
           {online ? (
             <div className="bg-green-400 rounded-full absolute top-0 left-0 w-4 h-4"></div>
           ) : (

@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { ImSpinner8 } from "react-icons/im";
 import useAxios from "../Hooks/useAxios";
 
 const Conversation = ({ data, currentUserId, online }) => {
@@ -11,7 +12,12 @@ const Conversation = ({ data, currentUserId, online }) => {
       return data.data;
     },
   });
-  if (!userData) return <p>Loading......</p>;
+  if (!userData)
+    return (
+      <p className="flex items-center justify-center mb-4">
+        <ImSpinner8 className="text-2xl animate-spin text-primary" />
+      </p>
+    );
   return (
     <>
       <div className="relative flex justify-between items-center p-4 hover:bg-[#80808038] cursor-pointer text-white">

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
 // import "../CSS/Chat.css";
 import { useQuery } from "@tanstack/react-query";
+import { ImSpinner8 } from "react-icons/im";
 import useAxios from "../Hooks/useAxios";
 import useUser from "../Hooks/useUser";
 import ChatBox from "./ChatBox";
@@ -61,7 +62,12 @@ const Chat = () => {
   //     text: "Hi, Suchona baby",
   //   });
   // };
-  if (!chats || !DBuser) return <p className="text-center">Loading...00...</p>;
+  if (!chats || !DBuser)
+    return (
+      <p className="flex items-center justify-center h-[80vh]">
+        <ImSpinner8 className="text-5xl animate-spin text-primary" />
+      </p>
+    );
   return (
     <div className="flex bg-[#333]">
       {/* Left  */}
@@ -90,7 +96,7 @@ const Chat = () => {
       {/* Right  */}
       <div className="w-[80%] flex flex-col gap-4">
         <div className="">
-          {currentChat && (
+          {currentChat ? (
             <ChatBox
               setSendMessage={setSendMessage}
               receiveMessage={receiveMessage}
@@ -98,6 +104,12 @@ const Chat = () => {
               chat={currentChat}
               currentUserId={DBuser._id}
             />
+          ) : (
+            <div className="bg-[#333] w-full h-[89vh] border-l flex items-center justify-center">
+              <span className="flex self-center justify-center text-xl text-white">
+                Tap on a Chat to Start Conversation...
+              </span>
+            </div>
           )}
         </div>
       </div>
